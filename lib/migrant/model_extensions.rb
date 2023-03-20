@@ -2,10 +2,10 @@ module Migrant
   module ModelExtensions
     attr_accessor :schema
     
-    def belongs_to(*args)
+    def belongs_to(name, scope = nil, **options)
       super
       create_migrant_schema
-      @schema.add_association(self.reflect_on_association(args.first))
+      @schema.add_association(self.reflect_on_association(name))
     end
         
     def create_migrant_schema
