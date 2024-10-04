@@ -8,8 +8,14 @@ module Migrant
       @schema.add_association(self.reflect_on_association(name))
     end
         
+    def support_class
+      # original version: [ActiveRecord::Base, ApplicationRecord]
+      # to be extend to support rails 6.1, some superclass has been added, such as ActiveStorage & ActionText
+      Rails.version.to_f > 6.0 ? [ActiveRecord::Base, ApplicationRecord, ActiveStorage::Record, ActionText::Record] : [ActiveRecord::Base, ApplicationRecord]
+    end
+
     def create_migrant_schema
-      if self.superclass.in?([ActiveRecord::Base, ApplicationRecord])
+      if self.superclass.in?(support_class)
        @schema ||= Schema.new
       else
         @schema ||= InheritedSchema.new(self.superclass.schema)
@@ -23,7 +29,7 @@ module Migrant
       create_migrant_schema
       @structure_defined = true
 
-      if self.superclass.in?([ActiveRecord::Base, ApplicationRecord])
+      if self.superclass.in?(support_class)
         @schema.define_structure(type, &block)
         @schema.validations.each do |field, validation_options|
           validations = (validation_options.class == Array)? validation_options : [validation_options]
@@ -61,7 +67,7 @@ module Migrant
       raise NoStructureDefined.new("In order to mock() #{self.to_s}, you need to define a Migrant structure block") unless @schema
  
       attribs = {}
-      attribs.merge!(self.superclass.mock_attributes(attributes, recursive)) unless self.superclass.in?([ActiveRecord::Base, ApplicationRecord])
+      attribs.merge!(self.superclass.mock_attributes(attributes, recursive)) unless self.superclass.in?(support_class)
       new attribs.merge(mock_attributes(attributes, recursive))
     end
     
