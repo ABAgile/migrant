@@ -11,7 +11,7 @@ module Migrant
     def support_class
       # original version: [ActiveRecord::Base, ApplicationRecord]
       # to be extend to support rails 6.1, some superclass has been added, such as ActiveStorage & ActionText
-      Rails.version.to_f > 6.0 ? [ActiveRecord::Base, ApplicationRecord, ActiveStorage::Record, ActionText::Record] : [ActiveRecord::Base, ApplicationRecord]
+      @support_class ||= Rails.version.to_f > 6.0 ? [ActiveRecord::Base, ApplicationRecord, ActiveStorage::Record, ActionText::Record] : [ActiveRecord::Base, ApplicationRecord]
     end
 
     def create_migrant_schema
